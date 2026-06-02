@@ -9,9 +9,9 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay,classificat
 veriSeti = pd.read_csv("bank-full.csv",sep=";")
 
 # Veri Ön İşleme
+print("--- VeriSeri Type----")
 print(veriSeti.dtypes)
 print(veriSeti.head())
-print(veriSeti.columns)
 
 # Ardından mixedNB() fonksiyonunu kullanabilmek için kategorik nitelikler LabelEnceder() yardımı ile 
 # ayrık sayısal hale dönüştürülmüştür. 
@@ -26,14 +26,17 @@ label_encoder =  LabelEncoder()
 
 kagetorikNitelikler = []
 for nitelik in veriSeti.columns:
-    if veriSeti[nitelik].dtype=="object":
+    if veriSeti[nitelik].dtype in ['object', 'string']:
      kagetorikNitelikler.append(veriSeti.columns.get_loc(nitelik))
+     veriSeti[nitelik] = veriSeti[nitelik].astype(object)
      veriSeti.loc[:,nitelik]= label_encoder.fit_transform(veriSeti.loc[:,nitelik])
      veriSeti[nitelik]=veriSeti[nitelik].astype("int64")
      
      kagetorikNitelikler.pop(len(kagetorikNitelikler)-1)
      
-print(veriSeti.describe())
+     
+print("--- VeriSeri Type----")
+print(veriSeti.dtypes)
   
 # Scikit-learn kütüphanesinin model_selection modülünden train_test_split() fonk. kullanilarak
 # egitim ve test veri setleri olusturulmustur. Verinin %70 'i egitim ,%30 ise test veri setinde olacak sekilde
@@ -56,3 +59,13 @@ print("y_train------------------------------")
 print(y_train)
 print("y_test-------------------------------")
 print(y_test)
+
+# Modelleme
+# Naive Bayes sınıflandırıcı modelinin (nb_model) oluşturulabilmesi için MixedNB() kullanılmıştır.
+# Bunun için veri setindeki kategorik niteliklerin indeksini içeren kategorikNitelikler listesi verilmiştir (categorical_features). 
+# Ardından nb_model modelinin fit() fonksiyonuna eğitim veri seti ve eğitim veri setinin hedef niteliği verilmiştir.
+print("--------- Kategorik Nitelikler ---------------")
+print(kagetorikNitelikler)
+nb_model = MixedNB(categorical_features=kagetorikNitelikler)
+nb_model.fit(X_train,y_train)
+
