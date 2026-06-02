@@ -96,3 +96,50 @@ my_cm_p = ConfusionMatrixDisplay(my_cm,display_labels=["no","yes"])
 
 my_cm_p.plot()
 plt.show()
+
+# Kontenjans tablosundaki tn, tp, fn, fp değerlerinin sırasıyla aynı isimlerde
+# tanımlanan değişkenlere atanabilmesi için my_cm.ravel() kullanılmıştır.
+tn,fp,fn,tp = my_cm.ravel()
+print("True Negatives",tn)
+print("False Positives",fp)
+print("False Negatives",fn)
+print("True Positives",tp)
+
+# Bu bilgiler ışığında, bir önceki bölümde k-NN model performansı değerlendirilirken
+# formüller yardımı ile hesaplanan tüm ölçütler Naive Bayes sınıflandırıcı modeli için de hesaplanabilir.
+# Bu bölümde classification_report() ile en temel performans değerlendirme ölçütleri elde edilmiştir. 
+
+my_report = classification_report(y_true=y_test,y_pred=y_tahmin,labels=["no","yes"])
+print(my_report)
+
+# yes sınıfının pozitif sınıf seçilmiş olması durumunda;
+# gerçekte banka vadeli mevduatına abone olan müşteriler arasında,
+# modelin doğru şekilde öngördüğü ve gerçekte de banka vadeli mevduatına abone olan müşterilerin oranı %53’tür (duyarlılık/recall).
+
+# no sınıfının pozitif sınıf seçilmiş olması durumunda; 
+# gerçekte banka vadeli mevduatına abone olmayan müşteriler arasında, 
+# modelin doğru şekilde öngördüğü ve gerçekte de banka vadeli mevduatına abone olmayan müşterilerin oranı ise %92’tür (duyarlılık/recall).
+
+#Sınıfa bağlı kesinlik ve F-Ölçüsü değerleri de yukarıdakilere benzer şekilde yorumlanabilir.
+
+# Hem gerçek hem de tahmin edilen yes sınıfına ait müşteriler ele alındığında,
+# aslında modelin yes sınıfına ait gözlemleri daha az başarı ile tahmin ettiği görülebilir. 
+# Bunun bir nedeni olarak veri setinde 39922 adet no, 5289 adet ise yes sınıfına ait örneğin yer alması olabilir. 
+# Yani modelin eğitimi ve testinde no sınıfına ait örneklerin sayısı, 
+# yes sınıfına ait örneklerin sayısının yaklaşık 8 katıdır. 
+# Model no sınıfına ait daha çok örnek görmüştür ve bu nedenle yes sınıfına ait örnekleri
+# daha az başarı ile tahmin etmesi çok şaşırtıcı değildir. İşte özellikle bu 
+# gibi sınıf dengesizliğinin olduğu durumlarda 
+# her ne kadar doğruluk %87 elde edilmişse de F-Ölçüsü model performansını belirlemede daha etkilidir.
+# yes sınıfının pozitif seçilmesi durumunda F-Ölçüsü %49 çıkmıştır. 
+# Oysa, pozitif sınıfın no seçilmesi durumunda F-Ölçüsü %93’tür. 
+# Dolayısıyla sınıflandırıcının nihai performans değerinin
+# belirlenebilmesinde makro ortalama (macro averaging) performans değerleri etkili olabilir.
+# Yani doğruluk %87, duyarlılık %72, kesinlik %70 ve F-Ölçüsü %71 alınabilir.
+
+
+
+
+ 
+
+
