@@ -136,7 +136,61 @@ print(my_report)
 # Dolayısıyla sınıflandırıcının nihai performans değerinin
 # belirlenebilmesinde makro ortalama (macro averaging) performans değerleri etkili olabilir.
 # Yani doğruluk %87, duyarlılık %72, kesinlik %70 ve F-Ölçüsü %71 alınabilir.
+# --------------------------------------------------------------------------------------------
+# 5-kat Tabakalı Çapraz Geçerleme
+# Tabakalı çapraz geçerlemenin gerçekleştirilebilmesi için sklearn.model_selection modülündeki StratifiedKFold() fonksiyonu kullanılmıştır.
+# n_splits kaç kat çapraz geçerleme yapılacağını/kaç parçanın oluşturulacağını,
+# shuffle gruplara ayırmadan önce her sınıfın örneklerinin karıştırılıp karıştırılmayacağını gösteren parametrelerdir.
+# Bu bilgiler yardımı ile cv nesnesi oluşturulmuştur.
+# Ardından for döngüsü içinde eğitim ve testte kullanılacak örneklerin indeks değerleri aşağıdaki gibi yazdırılmıştır.
+# cv.split() sırasıyla tahmini sağlayan nitelikler (X) ile hedef niteliği (y) almaktadır. 
+# Orijinal veri seti birbirine olabildiğince eşit sayıda 5 parçaya ayrılmaktadır. 
+# Her parçanın biri test, diğer dördü ise eğitim veri setinin oluşturulması için kullanılmaktadır. 
+# for döngüsünde train_index ve test_index her bir iterasyonda sırasıyla eğitim ve test veri setlerinde 
+# yer alacak gözlemlerin indeks bilgisini tutmaktadır.
 
+from sklearn.model_selection import StratifiedKFold
+k=5
+cv= StratifiedKFold(n_splits=k,shuffle=True,random_state=1)
+for train_index,test_index in cv.split(X=veriSeti.iloc[:,0:16],y=veriSeti.y):
+    print("Egitim Indisleri :",train_index)
+    print("Test Indisleri:",test_index,"\n")
+
+#  Örneğin ilk iterasyonda 0, 1, 2 …. 45208, 45209 ve 45210 indeks numaralı örnekler eğitim veri setinde  
+#  6, 12, 28, …, 45199, 45204 ve 45205 indeks numaralı örnekler ise test veri setinde yer alacaktır.    
+
+#  5 farklı iterasyon olacağından, 5 defa da performans değerlendirme ölçütleri yeniden hesaplanacaktır (Örneğin 5 farklı doğruluk, 5 farklı hata, 5 farklı duyarlılık gibi).
+#  Bu örnek için doğruluk ve F-Ölçüsünün hesaplanmasına karar verilmiştir. 
+#  Dolayısıyla doğruluk ve F-Ölçüsü metriklerinin her iterasyonda hesaplanacak değerlerini tutabilmek için dogruluk 
+#  ve F1 adında iki liste tanımlanmıştır.
+#  Sonrasında cv nesnesi yukarıda detayları verildiği şekilde tanımlanarak for döngüsü yapılandırılmıştır. 
+#  for döngüsünün her bir iterasyonunda X_train, X_test, y_train ve y_test değişkenleri yapılandırılmaktadır.
+#  Ardından Naive Bayes sınıflandırıcı modeli kurulmakta (nb_model), model tahminleri elde edilmekte (y_tahmin), 
+#  sınıflandırma raporundan (my_report) doğruluk ve F-Ölçüsü değerleri çekilerek sırasıyla dogruluk ve F1 listelerine eklenmektedir.
+
+dogruluk = []
+F1 =[]
+k=5
+cv = StratifiedKFold(n_splits=k,shuffle=True,random_state=1)
+
+for train_index,test_index in cv.split(X=veriSeti,y=veriSeti.y):
+    X_train,X_test,y_train,y_test = veriSeti.iloc[train_index,0:16],veriSeti.iloc[test_index,0:16],veriSeti.iloc[train_index,16],veriSeti.iloc[test_index,16]
+    
+# Naive Bayes Siniflandiricisinin Oluşturulması
+nb_model = MixedNB(categorical_features=kagetorikNitelikler)
+nb_model.fit(X_train,y_train)
+
+# Naive Bayes Siniflandirici Tahminlerinin Elde edilmesi 
+y_tahmin =nb_model.predict(X_test)
+y_tahmin = label_encoder.inverse_transform(y_tahmin)
+y_test =label_encoder.inverse_transform(y_test)
+
+# Performans degerlerndirme 
+my_report = classification_report(y_true=y_test,y_pred=y_tahmin,labels=["no","yes"],output_dict=True)
+dogruluk.append(my_report["accuracy"])
+F1.append(my_report["yes"]["f1-score"])
+
+print(my_report)
 
 
 
