@@ -185,7 +185,7 @@ y_tahmin =nb_model.predict(X_test)
 y_tahmin = label_encoder.inverse_transform(y_tahmin)
 y_test =label_encoder.inverse_transform(y_test)
 
-# Performans degerlerndirme 
+# Performans degerlendirme 
 my_report = classification_report(y_true=y_test,y_pred=y_tahmin,labels=["no","yes"],output_dict=True)
 dogruluk.append(my_report["accuracy"])
 F1.append(my_report["yes"]["f1-score"])
